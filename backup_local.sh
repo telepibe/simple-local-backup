@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Bash unofficial strict mode
+# http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -27,9 +30,11 @@ Backup iniciado el $date con cmd:
 $cmd
 EOC
 
+# Be nice
 ionice -c 3 -p $$ >/dev/null
 renice +12  -p $$ >/dev/null
 
+# TODO perhaps use array for this and avoid eval+var
 set +e
 eval "$cmd"
 ret=$?
@@ -37,6 +42,7 @@ set -e
 
 echo -e '###\n' >> $log
 
+# Output for (ana)cron
 if  [[ $ret -gt 0 ]]
 then
 	echo "rsync error ${ret}. Check ${log}" >&2
