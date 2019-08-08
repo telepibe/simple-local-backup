@@ -20,6 +20,7 @@ destination="/mnt/iowa-data/juani/backups"
 
 date=$(date "+%d-%m-%Y a las %H:%M")
 
+# TODO perhaps use array for this and avoid eval+var
 cmd="rsync $opts $toBackup $destination >> $log 2>&1"
 
 
@@ -34,7 +35,6 @@ EOC
 ionice -c 3 -p $$ >/dev/null
 renice +12  -p $$ >/dev/null
 
-# TODO perhaps use array for this and avoid eval+var
 set +e
 eval "$cmd"
 ret=$?
@@ -42,7 +42,7 @@ set -e
 
 echo -e '###\n' >> $log
 
-# Output for (ana)cron
+# Output for cron
 if  [[ $ret -gt 0 ]]
 then
 	echo "rsync error ${ret}. Check ${log}" >&2
