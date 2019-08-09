@@ -5,30 +5,38 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-#toBackup="/home/juani/Documents"
-#toBackup="${toBackup} /home/juani/Soft"
-#toBackup="${toBackup} /home/juani/VirtualBox\ VMs"
+destination="/mnt/iowa-data/juani/backups"
 
-toBackup="/home/juani/Documents"
-toBackup+=" /home/juani/Soft"
-toBackup+=" /home/juani/VirtualBox\ VMs"
-
-opts="-hv --archive --delete"
 log="/home/juani/.var/backup.log"
 
-destination="/mnt/iowa-data/juani/backups"
+toBackup=(
+			/home/juani/Documents
+			/home/juani/Soft
+			"/home/juani/VirtualBox VMs"
+)
+
+opts=(
+		-hv
+		--archive
+		--delete
+)
 
 date=$(date "+%d-%m-%Y a las %H:%M")
 
-# TODO perhaps use array for this and avoid eval+var
-cmd="rsync $opts $toBackup $destination >> $log 2>&1"
+#cmd="rsync ${opts[@]} ${toBackup[@]} $destination >> $log 2>&1"
 
+function closeLog {
+	echo -e '###\n' >> $log
+}
+
+trap closeLog EXIT
 
 cat >> $log << EOC
 
 ###
 Backup iniciado el $date con cmd:
-$cmd
+rsync ${opts[@]} ${toBackup[@]} $destination >> $log 2>&1
+
 EOC
 
 # Be nice
@@ -36,11 +44,9 @@ ionice -c 3 -p $$ >/dev/null
 renice +12  -p $$ >/dev/null
 
 set +e
-eval "$cmd"
+rsync "${opts[@]}" "${toBackup[@]}" "${destination}" >> "${log}" 2>&1
 ret=$?
 set -e
-
-echo -e '###\n' >> $log
 
 # Output for cron
 if  [[ $ret -gt 0 ]]
