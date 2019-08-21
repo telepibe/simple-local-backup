@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 destination="/mnt/iowa-data/juani/backups"
 
-log="/home/juani/.var/backup.log"
+log="/home/juani/.var/logs/backup.log"
 
 toBackup=(
 			/home/juani/Documents
@@ -23,7 +23,6 @@ opts=(
 
 date=$(date "+%d-%m-%Y a las %H:%M")
 
-#cmd="rsync ${opts[@]} ${toBackup[@]} $destination >> $log 2>&1"
 
 function closeLog {
 	echo -e '###\n' >> $log
@@ -51,6 +50,6 @@ set -e
 # Output for cron
 if  [[ $ret -gt 0 ]]
 then
-	echo "rsync error ${ret}. Check ${log}" >&2
+	echo "rsync error with code ${ret}. Check ${log}" >&2
 	exit $ret
 fi
